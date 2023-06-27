@@ -31,10 +31,10 @@ login(token=pyannote_token)
 snapshot_download(repo_id="pyannote/speaker-diarization") # hfhub model
 
 # Load audio file .mp3
-audio_file = open('20230315_pmoney.mp3','rb')
+
 src = "20230315_pmoney.mp3"
 dst = "20230315_pmoney.wav"
-
+audio_file = open('20230315_pmoney.wav','rb')
 ### Function to convert mp3 to wav ###                                                     
 sound = AudioSegment.from_mp3(src)
 sound.export(dst, format="wav")
@@ -54,6 +54,11 @@ pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1", use_auth
 model = whisper.load_model("tiny.en")
 asr_result = model.transcribe(audio_file) # .transcribe() from pyannote_whisper, not the whisper pkg
 diarization_result = pipeline(audio_file) # only takes wav, need to convert .mp3
+# 5. print the result
+for turn, _, speaker in diarization_result.itertracks(yield_label=True):
+    print(f"start={turn.start:.1f}s stop={turn.end:.1f}s speaker_{speaker}")
+
+
 final_result = diarize_text(asr_result, diarization_result)
 
 # Output transcription labeled by speakers
